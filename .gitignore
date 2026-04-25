@@ -1,5 +1,17 @@
-__pycache__/
-*.pyc
+# macOS
 .DS_Store
-*.swp
-.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Commit message file
+COMMIT_MSG.txt
