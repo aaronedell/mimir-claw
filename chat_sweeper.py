@@ -86,7 +86,7 @@ META_BLOCK_RE = re.compile(
 def load_cursor() -> dict:
     if CURSOR_FILE.exists():
         try:
-            return json.loads(CURSOR_FILE.read_text())
+            return json.loads(CURSOR_FILE.read_text(encoding="utf-8"))
         except Exception:
             return {}
     return {}
@@ -95,7 +95,7 @@ def load_cursor() -> dict:
 def save_cursor(cursor: dict) -> None:
     CURSOR_FILE.parent.mkdir(parents=True, exist_ok=True)
     tmp = CURSOR_FILE.with_suffix(".tmp")
-    tmp.write_text(json.dumps(cursor, indent=2))
+    tmp.write_text(json.dumps(cursor, indent=2), encoding="utf-8")
     tmp.replace(CURSOR_FILE)
 
 
@@ -163,7 +163,7 @@ def parse_session(path: Path, cursor_iso: str | None) -> list[dict]:
     """Return new messages from a session file after cursor_iso (ISO string)."""
     out = []
     try:
-        with path.open() as f:
+        with path.open(encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -237,13 +237,15 @@ def date_key(msg: dict) -> str:
 def append_to_daily(date_str: str, blocks: list[str]) -> Path:
     path = MEMORY_DIR / f"{date_str}-chats.md"
     exists = path.exists()
-    with path.open("a") as f:
+    with path.open("a", encoding="utf-8") as f:
         if not exists:
             f.write(f"# Chat Log — {date_str}\n\n")
             f.write("_Auto-swept by Mimir Claw. Raw conversation record._\n\n")
         for b in blocks:
             f.write(b)
             f.write("\n")
+    # Note: On Windows this sets the read-only bit for the owner, not true
+    # Unix-style permissions. For actual ACL restrictions, use icacls.
     try:
         os.chmod(path, 0o600)
     except OSError:
